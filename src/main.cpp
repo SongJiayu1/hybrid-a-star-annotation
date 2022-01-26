@@ -50,9 +50,9 @@ int main(int argc, char** argv) {
   message("cell size: ", HybridAStar::Constants::cellSize);
 
   if (HybridAStar::Constants::manual) {
-    message("mode: ", "manual");//静态地图
+    message("mode: ", "manual"); // 静态地图
   } else {
-    message("mode: ", "auto");//动态地图
+    message("mode: ", "auto"); // 动态地图
   }
 
   ros::init(argc, argv, "a_star");

@@ -36,18 +36,25 @@ namespace Constants {
 
 /// A flag for additional debugging output via `std::cout`
 static const bool coutDEBUG = false; //调试开关
-/// A flag for the mode (true = manual; false = dynamic). Manual for static map or dynamic for dynamic map.
-static const bool manual = true;//true表示静态地图；false表示动态地图
+
+/// A flag for the mode (true = manual; false = dynamic). 
+// Manual for static map or dynamic for dynamic map.
+static const bool manual = true; // true 表示静态地图；false 表示动态地图
+
 /// A flag for the visualization of 3D nodes (true = on; false = off)
-static const bool visualization = false && manual;//可视化开关
+static const bool visualization = false && manual; // 可视化开关
+
 /// A flag for the visualization of 2D nodes (true = on; false = off)
-static const bool visualization2D = false && manual; //在2D视图上可视化
+static const bool visualization2D = false && manual; // 在 2D 视图上可视化
+
 /// A flag to toggle reversing (true = on; false = off)
-static const bool reverse = true; //true表示可以倒退；false表示只能前进不能倒退
+static const bool reverse = true; // true 表示可以倒退；false 表示只能前进不能倒退
+
 /// A flag to toggle the connection of the path via Dubin's shot (true = on; false = off)
-static const bool dubinsShot = true; //切换Dubin路径的开关
+static const bool dubinsShot = true; //切换 Dubin 路径的开关
+
 /// A flag to toggle the Dubin's heuristic, this should be false, if reversing is enabled (true = on; false = off)
-static const bool dubins = false;//Dubin路径的切换开关: 若车子可以倒退，值为false
+static const bool dubins = false; // Dubin 路径的切换开关: 若车子可以倒退，值为 false
 /*!
    \var static const bool dubinsLookup
    \brief A flag to toggle the Dubin's heuristic via lookup, potentially speeding up the search by a lot
@@ -61,7 +68,7 @@ static const bool twoD = true;
 // GENERAL CONSTANTS
 
 /// [#] --- Limits the maximum search depth of the algorithm, possibly terminating without the solution
-static const int iterations = 30000; //最大迭代次数
+static const int iterations = 30000; // 最大迭代次数
 /// [m] --- Uniformly adds a padding around the vehicle
 static const double bloating = 0; //膨胀范围
 /// [m] --- The width of the vehicle
@@ -69,17 +76,19 @@ static const double width = 1.75 + 2 * bloating;//车的宽度
 /// [m] --- The length of the vehicle
 static const double length = 2.65 + 2 * bloating;//车的长度
 /// [m] --- The minimum turning radius of the vehicle
-static const float r = 6;//最小转弯半径
+static const float r = 6; // 最小转弯半径
 /// [m] --- The number of discretizations in heading
-static const int headings = 72;//车体朝向的离散数量
+static const int headings = 72; // 车体朝向的离散数量
 /// [°] --- The discretization value of the heading (goal condition)
 static const float deltaHeadingDeg = 360 / (float)headings; //朝向离散步长(以度表示)
 /// [c*M_PI] --- The discretization value of heading (goal condition)
 static const float deltaHeadingRad = 2 * M_PI / (float)headings; //朝向离散步长(以弧度表示)
 /// [c*M_PI] --- The heading part of the goal condition 
 static const float deltaHeadingNegRad = 2 * M_PI - deltaHeadingRad;
+
 /// [m] --- The cell size of the 2D grid of the world
-static const float cellSize = 1; //在2D网格中cell的大小
+static const float cellSize = 1; // 在 2D 栅格中 cell 的大小
+
 /*!
   \brief [m] --- The tie breaker breaks ties between nodes expanded in the same cell
 
@@ -133,16 +142,18 @@ static const int bbSize = std::ceil((sqrt(width * width + length* length) + 4) /
 /// [#] --- The sqrt of the number of discrete positions per cell
 static const int positionResolution = 10;//每个cell里的离散位置数量的平方根
 /// [#] --- The number of discrete positions per cell
-static const int positions = positionResolution * positionResolution;//位置的数量
+static const int positions = positionResolution * positionResolution; // 位置的数量
+
 /// A structure describing the relative position of the occupied cell based on the center of the vehicle
-struct relPos {//相对于中心的位置：即以中心为坐标原点
+struct relPos { // 相对于中心的位置：即以中心为坐标原点
   /// the x position relative to the center
   int x; 
   /// the y position relative to the center
   int y;
 };
+
 /// A structure capturing the lookup for each theta configuration
-struct config {//用以获取每个theta的查找表的结构体
+struct config {  // 用以获取每个 theta 的查找表的结构体
   /// the number of cells occupied by this configuration of the vehicle
   int length;//长度，
   /*!
@@ -150,7 +161,7 @@ struct config {//用以获取每个theta的查找表的结构体
      \brief The maximum number of occupied cells
      \todo needs to be dynamic
   */
-  relPos pos[64];//这里为什么是64有待考证
+  relPos pos[64]; // 这里为什么是 64 有待考证
 };
 
 // _________________

@@ -32,7 +32,7 @@ void Smoother::smoothPath(DynamicVoronoi& voronoi) {
   // current number of iterations of the gradient descent smoother
   int iterations = 0;
   // the maximum iterations for the gd smoother
-  int maxIterations = 500;//最大迭代次数
+  int maxIterations = 500; // 最大迭代次数
   // the lenght of the path in number of nodes
   int pathLength = 0;
 
@@ -91,8 +91,10 @@ void Smoother::smoothPath(DynamicVoronoi& voronoi) {
   path = newPath;
 }
 
-void Smoother::tracePath(const Node3D* node, int i, std::vector<Node3D> path) {
-  if (node == nullptr) {
+void Smoother::tracePath(const Node3D* node, int i, std::vector<Node3D> path) 
+{
+  if (node == nullptr) 
+  {
     this->path = path;
     return;
   }

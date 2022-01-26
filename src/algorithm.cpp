@@ -1,14 +1,14 @@
 /**
  * @file algorithm.h
- * @brief Hybrid A* 算法的核心过程函数，只有一个函数hybridAStar()
+ * @brief Hybrid A* 算法的核心过程函数，只有一个函数 hybridAStar()
  * 输入：
- *      始点、
- *      目标点、
- *      配置空间的3维和2维表示（2D用来A*，3D用于hybrid A*）、
- *      搜索网格的宽度及高度、
- *      配置空间的查找表、
- *      Dubins查找表（程序实际上没有使用该表，而是直接调用OMPL库计算）、
- *      RVIZ可视化类(用于显示结果)
+ *      始点
+ *      目标点
+ *      配置空间的 3 维和 2 维表示（2D用来 A*，3D 用于 hybrid A*）
+ *      搜索网格的宽度及高度
+ *      配置空间的查找表
+ *      Dubins 查找表（程序实际上没有使用该表，而是直接调用 OMPL 库计算）
+ *      RVIZ 可视化类（用于显示结果）
  * 返回：
  *      满足约束条件的节点（数据结构用指针表示）
  * 
@@ -35,15 +35,18 @@ Node3D* dubinsShot(Node3D& start, const Node3D& goal, CollisionDetection& config
    \brief A structure to sort nodes in a heap structure
 */
 /**
- * 重载运算符，用来生成节点的比较 逻辑，該函數在“boost::heap::compare<CompareNodes>”获得使用
+ * 重载运算符，用来生成节点的比较 逻辑，该函数在 “boost::heap::compare<CompareNodes>” 获得使用
  */
 struct CompareNodes {
   /// Sorting 3D nodes by increasing C value - the total estimated cost
-  bool operator()(const Node3D* lhs, const Node3D* rhs) const {
+  bool operator()(const Node3D* lhs, const Node3D* rhs) const 
+  {
     return lhs->getC() > rhs->getC();
   }
+
   /// Sorting 2D nodes by increasing C value - the total estimated cost
-  bool operator()(const Node2D* lhs, const Node2D* rhs) const {
+  bool operator()(const Node2D* lhs, const Node2D* rhs) const 
+  {
     return lhs->getC() > rhs->getC();
   }
 };
@@ -54,39 +57,47 @@ struct CompareNodes {
 //###################################################
 Node3D* Algorithm::hybridAStar(Node3D& start,
                                const Node3D& goal,
-                               Node3D* nodes3D,
+                               Node3D* nodes3D, // 配置空间的 3 维和 2 维表示（2D用来 A*，3D 用于 hybrid A*）
                                Node2D* nodes2D,
-                               int width,
-                               int height,
-                               CollisionDetection& configurationSpace,
+                               int width,       // 搜索网格的宽度和高度
+                               int height,      
+                               CollisionDetection& configurationSpace, // 包含了地图和碰撞查找表
                                float* dubinsLookup,
-                               Visualize& visualization) {
+                               Visualize& visualization) 
+{
 
   // PREDECESSOR AND SUCCESSOR INDEX
   int iPred, iSucc;
   float newG;
+
   // Number of possible directions, 3 for forward driving and an additional 3 for reversing
-  int dir = Constants::reverse ? 6 : 3;//如果是后退，那么可能的前进方向为6；否则为3
+  int dir = Constants::reverse ? 6 : 3; // 如果可以后退，那么车辆可能的前进方向为 6；否则为 3。
+  // Constants:reverse 是一个 static const bool 类型的变量。
+  // 判断 Constants::reverse 是否是 true，如果是 true，dir = 6，否则 dir = 3。
+
   // Number of iterations the algorithm has run for stopping based on Constants::iterations
-  int iterations = 0;//迭代计数
+  int iterations = 0; // 迭代计数
 
   // VISUALIZATION DELAY
   ros::Duration d(0.003);
 
   // OPEN LIST AS BOOST IMPLEMENTATION
-  typedef boost::heap::binomial_heap<Node3D*,
-          boost::heap::compare<CompareNodes>
-          > priorityQueue;
-  priorityQueue O;//open集
+  typedef boost::heap::binomial_heap<Node3D*, boost::heap::compare<CompareNodes>> priorityQueue;
+  // 这里定义了一个 binomial_heap 二项堆，堆的每个元素类型是 Node3D，比较函数是 CompareNodes。
+  // 在比较函数中定义了这个 二项堆 的比较规则。
 
-  // update h value: 计算到目标的启发式值
+  priorityQueue O; // 实例化一个 open list，后面会用到 O.top() 来返回 cost 最小的 Node3D。
+
+  // update h value: 计算 start 到目标的启发式值
   updateH(start, goal, nodes2D, dubinsLookup, width, height, configurationSpace, visualization);
+
+  // 将 start 加入 open 集合:
   // mark start as open
-  start.open();//将start加入open 集合: 1)将点标记为open
+  start.open(); //  1) 将点标记为open
   // push on priority queue aka open list
-  O.push(&start);// 2) 加入集合
-  iPred = start.setIdx(width, height); //计算索引位置
-  nodes3D[iPred] = start;
+  O.push(&start); // 2) 加入集合
+  iPred = start.setIdx(width, height); // 计算索引位置
+  nodes3D[iPred] = start;  // 将处理过的节点加入 数组。
 
   // NODE POINTER
   Node3D* nPred;
@@ -147,7 +158,7 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
     //    }
 
     // pop node with lowest cost from priority queue
-    //循环部分：从集合中取出一个最低代价的点
+    // 循环部分：从集合中取出一个最低代价的点
     nPred = O.top();
     // set index
     iPred = nPred->setIdx(width, height);//获取该点在nodes3D的索引 (前缀i表示index, n表示node)
@@ -177,8 +188,9 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
       O.pop();//并从open set中移除 (先取出点来，再干活)
 
       // _________
-      // GOAL TEST检测当前节点是否是终点或者是否超出解算的最大时间(最大迭代次数)
-      if (*nPred == goal || iterations > Constants::iterations) {
+      // GOAL TEST 检测当前节点是否是终点或者是否超出解算的最大时间 (最大迭代次数)
+      if (*nPred == goal || iterations > Constants::iterations) // 30000
+      {
         // DEBUG
         return nPred;
       }//检查该点是否为目标点：是的话直接返回，表示搜索结束；不是的话就继续搜索
@@ -268,7 +280,7 @@ Node3D* Algorithm::hybridAStar(Node3D& start,
 
 //###################################################
 //                2D A*
-// 原始A*算法，返回start到goal的cost-so-far
+// 原始 A* 算法，返回 start 到 goal 的 cost-so-far
 //###################################################
 float aStar(Node2D& start,
             Node2D& goal,
@@ -388,21 +400,31 @@ float aStar(Node2D& start,
 //###################################################
 //                                         COST TO GO
 //###################################################
-// 计算到目标的启发值(cost)
-// 这里的cost由三项组成：《Practical Search Techniques in Path Planning for Autonomous Driving》
-// 1) "non-holonomic-without-obstacles" heuristic:（用于指导搜索向目标方向前进）
-//    受运动学约束的无障碍启发式值。论文的计算建议为： max(Reed-Shepp距离/Dubins距离, 欧氏距离) 表示
-//    至于用Reed-Shepp距离还是Dubins距离取决于车辆是否可倒退
-// 2) "holonomic-with-obstacles" heuristic：（用于发现U形转弯(U-shaped obstacles)/死路(dead-ends)）
-//    （不受运动学约束的）有障约束启发式值(即：A*)
-// 注1： 实际计算时，优先考虑运动学启发式值，A*作为可选项。至于是否启用欧氏距离和A*的启发式值，取决于计算
-//      的精度和CPU性能（可作为调优手段之一）
-// 注2： 实际计算与论文中的描述存在差异：
-//      （1）实际计算的第一步用的启发式值为“Reed-Shepp距离/Dubins距离”，而论文为“max(Reed-Shepp距离/Dubins距离, 欧氏距离)”
-//      （2）实际计算的第二步用的启发式值为A*的启发式值 减去 “start与goal各自相对自身所在2D网格的偏移量(二维向量)的欧氏距离”
-//          该步计算的意义还需仔细分析，目前我还没想明白代码这样设计的理由。
-void  updateH(Node3D& start, const Node3D& goal, Node2D* nodes2D, float* dubinsLookup, int width, int height,
- CollisionDetection& configurationSpace, Visualize& visualization) {
+// 计算到目标的启发值 (heuristic cost)
+// 参见论文：《Practical Search Techniques in Path Planning for Autonomous Driving》
+
+// 这里的 cost 由两部分构成：
+// 1) "non-holonomic-without-obstacles" heuristic - 受运动学约束的无障碍启发式值
+//        用于指导搜索向目标方向前进
+//        论文的计算建议为： max(Reed-Shepp 距离 or Dubins 距离, 欧氏距离) 
+//        至于用 Reed-Shepp 距离还是 Dubins 距离取决于车辆是否可倒退
+// 2) "holonomic-with-obstacles" heuristic - 不受运动学约束的有障约束启发式值 (即：A*)。
+//        用于发现 U 形转弯 (U-shaped obstacles) 和 死路 (dead-ends)
+
+// 注 1：实际计算时，优先考虑运动学启发式值，A* 作为可选项。至于是否启用欧氏距离和 A* 的启发式值，取决于计算
+//      的精度和 CPU 性能（可作为调优手段之一）
+// 注 2：实际计算与论文中的描述存在差异：
+//      （1）实际计算的第一步用的启发式值为 “Reed-Shepp 距离 / Dubins 距离”，
+//            而论文为 “max(Reed-Shepp 距离 / Dubins 距离, 欧氏距离)”
+//      （2）实际计算的第二步用的启发式值为 A* 的启发式值 减去 “start 与 goal 各自相对自身所在
+//            2D 网格的偏移量 (二维向量) 的欧氏距离”
+//       该步计算的意义还需仔细分析，目前我还没想明白代码这样设计的理由。
+
+void updateH(Node3D& start, const Node3D& goal, Node2D* nodes2D, float* dubinsLookup,
+              int width, int height, 
+              CollisionDetection& configurationSpace, 
+              Visualize& visualization) 
+{
   float dubinsCost = 0;
   float reedsSheppCost = 0;
   float twoDCost = 0;
@@ -410,7 +432,8 @@ void  updateH(Node3D& start, const Node3D& goal, Node2D* nodes2D, float* dubinsL
 
   // if dubins heuristic is activated calculate the shortest path
   // constrained without obstacles
-  if (Constants::dubins) {
+  if (Constants::dubins) 
+  {
 
     // ONLY FOR dubinsLookup
     //    int uX = std::abs((int)goal.getX() - (int)start.getX());
@@ -458,7 +481,7 @@ void  updateH(Node3D& start, const Node3D& goal, Node2D* nodes2D, float* dubinsL
     //      dubins_init(q0, q1, Constants::r, &dubinsPath);
     //      dubinsCost = dubins_path_length(&dubinsPath);
     
-    //这里改用open motion planning library的算法
+    // 这里改用 open motion planning library 的算法
     ompl::base::DubinsStateSpace dubinsPath(Constants::r);
     State* dbStart = (State*)dubinsPath.allocState();
     State* dbEnd = (State*)dubinsPath.allocState();
@@ -470,8 +493,9 @@ void  updateH(Node3D& start, const Node3D& goal, Node2D* nodes2D, float* dubinsL
   }
 
   // if reversing is active use a Reeds-Shepp 
-  //假如车子可以后退，则可以启动Reeds-Shepp 算法
-  if (Constants::reverse && !Constants::dubins) {
+  // 假如车子可以后退，则可以启动 Reeds-Shepp 算法 - 这里用了 ompl 库中的 RS 曲线类。
+  if (Constants::reverse && !Constants::dubins) 
+  {
     //    ros::Time t0 = ros::Time::now();
     ompl::base::ReedsSheppStateSpace reedsSheppPath(Constants::r);
     State* rsStart = (State*)reedsSheppPath.allocState();
@@ -480,7 +504,7 @@ void  updateH(Node3D& start, const Node3D& goal, Node2D* nodes2D, float* dubinsL
     rsStart->setYaw(start.getT());
     rsEnd->setXY(goal.getX(), goal.getY());
     rsEnd->setYaw(goal.getT());
-    reedsSheppCost = reedsSheppPath.distance(rsStart, rsEnd);
+    reedsSheppCost = reedsSheppPath.distance(rsStart, rsEnd);  // RS cost 就是 RS 曲线的弧长。
     //    ros::Time t1 = ros::Time::now();
     //    ros::Duration d(t1 - t0);
     //    std::cout << "calculated Reed-Sheep Heuristic in ms: " << d * 1000 << std::endl;
@@ -488,23 +512,28 @@ void  updateH(Node3D& start, const Node3D& goal, Node2D* nodes2D, float* dubinsL
 
   // if twoD heuristic is activated determine shortest path
   // unconstrained with obstacles
-  if (Constants::twoD && !nodes2D[(int)start.getY() * width + (int)start.getX()].isDiscovered()) {
+  // 注：这里的 (int)start.getY() * width + (int)start.getX() 是 start 节点所在栅格的 index。
+  if (Constants::twoD && !nodes2D[(int)start.getY() * width + (int)start.getX()].isDiscovered()) 
+  {
     //    ros::Time t0 = ros::Time::now();
     // create a 2d start node
     Node2D start2d(start.getX(), start.getY(), 0, 0, nullptr);
     // create a 2d goal node
     Node2D goal2d(goal.getX(), goal.getY(), 0, 0, nullptr);
+    
     // run 2d astar and return the cost of the cheapest path for that node
     nodes2D[(int)start.getY() * width + (int)start.getX()].setG(
-      //调用A*算法，返回cost-so-far, 并在2D网格中设置相应的代价值
       aStar(goal2d, start2d, nodes2D, width, height, configurationSpace, visualization)
+      // 调用 A* 算法，返回 cost-so-far, 并在 2D 网格中设置相应的代价值
       );
+
     //    ros::Time t1 = ros::Time::now();
     //    ros::Duration d(t1 - t0);
     //    std::cout << "calculated 2D Heuristic in ms: " << d * 1000 << std::endl;
   }
 
-  if (Constants::twoD) {
+  if (Constants::twoD) // 这里没看懂！
+  {
     // offset for same node in cell
     twoDoffset = sqrt( ((start.getX() - (long)start.getX()) - (goal.getX() - (long)goal.getX())) * 
                        ((start.getX() - (long)start.getX()) - (goal.getX() - (long)goal.getX())) +
@@ -512,13 +541,15 @@ void  updateH(Node3D& start, const Node3D& goal, Node2D* nodes2D, float* dubinsL
                        ((start.getY() - (long)start.getY()) - (goal.getY() - (long)goal.getY()))
                       );
     twoDCost = nodes2D[(int)start.getY() * width + (int)start.getX()].getG() - twoDoffset;
-    //getG()返回A*的启发式代价，twoDoffset为 start与goal各自相对自身所在2D网格的偏移量的欧氏距离
+    // getG() 返回 A* 的启发式代价，twoDoffset 为 start 与 goal 各自相对自身所在 2D 网格的偏移量的欧氏距离
 
   }
 
   // return the maximum of the heuristics, making the heuristic admissable
-  start.setH(std::max(reedsSheppCost, std::max(dubinsCost, twoDCost)));//将两个代价中的最大值作为启发式值
-  //注：虽然这里有三个数值，但Dubins Cost的启用和Reeds-Shepp Cost的启用是互斥的，所以实际上是计算两种cost而已
+  start.setH(std::max(reedsSheppCost, std::max(dubinsCost, twoDCost))); // 将两个代价中的最大值作为启发式值
+  
+  // 注：虽然这里有三个数值，但 Dubins Cost 的启用和 Reeds-Shepp Cost 的启用是互斥的，
+  // 所以实际上是计算两种 cost 而已。
 }
 
 //###################################################

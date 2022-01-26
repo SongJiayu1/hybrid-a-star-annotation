@@ -17,15 +17,15 @@ class Node2D {
   Node2D(): Node2D(0, 0, 0, 0, nullptr) {}
   /// Constructor for a node with the given arguments
   Node2D(int x, int y, float g, float h, Node2D* pred) {
-    this->x = x;//x位置
-    this->y = y;//y位置
-    this->g = g;//cost-so-far，目前的代价
-    this->h = h;//cost-to-come，要行走的代价
-    this->pred = pred;//predecessor，即前一个
-    this->o = false;//是否为open-set
-    this->c = false;//是否为close-set
-    this->d = false;//是否已被探查过的点
-    this->idx = -1;//索引值
+    this->x = x; // x 位置
+    this->y = y; // y 位置
+    this->g = g; // cost-so-far，目前的代价
+    this->h = h; // cost-to-come，要行走的代价
+    this->pred = pred; // predecessor，即前一个
+    this->o = false; // 是否为open-set
+    this->c = false; // 是否为close-set
+    this->d = false; // 是否已被探查过的点
+    this->idx = -1; // 索引值
   }
   // GETTER METHODS：查询函数，返回对应的值
   /// get the x position

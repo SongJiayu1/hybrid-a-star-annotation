@@ -31,7 +31,7 @@ namespace HybridAStar {
 class Planner {
  public:
   /// The default constructor
-  Planner();//默认构造器
+  Planner(); // 默认构造器
 
   /*!
      \brief Initializes the collision as well as heuristic lookup table
@@ -53,7 +53,7 @@ class Planner {
 
   /*!
      \brief setGoal
-     \param goal the goal pose 设置目标pose，即设置终点
+     \param goal the goal pose 设置目标 pose，即设置终点
   */
   void setGoal(const geometry_msgs::PoseStamped::ConstPtr& goal);
 
@@ -65,49 +65,53 @@ class Planner {
 
  private:
   /// The node handle
-  ros::NodeHandle n; //节点句柄
+  ros::NodeHandle n; // 节点句柄
   /// A publisher publishing the start position for RViz
-  ros::Publisher pubStart; //为RVIZ发布始点的发布器
+  ros::Publisher pubStart; // 为 RVIZ 发布始点的发布器
   /// A subscriber for receiving map updates
-  ros::Subscriber subMap;//接收地图信息的订阅器
+  ros::Subscriber subMap; // 接收地图信息的订阅器
   /// A subscriber for receiving goal updates
-  ros::Subscriber subGoal;//接收目标更新的订阅器
+  ros::Subscriber subGoal; // 接收目标更新的订阅器
   /// A subscriber for receiving start updates
-  ros::Subscriber subStart;//接收起点更新的订阅器
+  ros::Subscriber subStart; // 接收起点更新的订阅器
   /// A listener that awaits transforms
-  tf::TransformListener listener; //监听TF变换的变换树
+  tf::TransformListener listener; // 监听 TF 变换的变换树
   /// A transform for moving start positions
-  tf::StampedTransform transform;//用于改变始点的变换
+  tf::StampedTransform transform; // 用于改变始点的变换
   /// The path produced by the hybrid A* algorithm
-  Path path;//生成混合A*路径的实体对象
+  Path path; //生成混合 A* 路径的实体对象
   /// The smoother used for optimizing the path
-  Smoother smoother;//路径平滑实体
+  Smoother smoother; // 路径平滑实体
   /// The path smoothed and ready for the controller
-  Path smoothedPath = Path(true);//用于发布给控制器的平滑路径
+  Path smoothedPath = Path(true); // 用于发布给控制器的平滑路径
   /// The visualization used for search visualization
-  Visualize visualization;//可视化对象，与RVIZ交互
+  Visualize visualization; // 可视化对象，与 RVIZ 交互
   /// The collission detection for testing specific configurations
-  CollisionDetection configurationSpace;//碰撞检测类实体，用以检测某个配置是否会发生碰撞
+  CollisionDetection configurationSpace; // 碰撞检测类实体，用以检测某个配置是否会发生碰撞
   /// The voronoi diagram
-  DynamicVoronoi voronoiDiagram; //Voroni Diagram
+  DynamicVoronoi voronoiDiagram; // Voroni Diagram
   
-  //用来存储RVIZ的结果
+  // 用来存储 RVIZ 的结果
   /// A pointer to the grid the planner runs on
   nav_msgs::OccupancyGrid::Ptr grid;
-  /// The start pose set through RViz
-  geometry_msgs::PoseWithCovarianceStamped start;
-  /// The goal pose set through RViz
-  geometry_msgs::PoseStamped goal;
+
+  /// The start pose set through RVIZ
+  geometry_msgs::PoseWithCovarianceStamped start; // 规划起始点
+  
+  /// The goal pose set through RVIZ
+  geometry_msgs::PoseStamped goal;  // 规划终点
+
   /// Flags for allowing the planner to plan
   bool validStart = false;
   /// Flags for allowing the planner to plan
   bool validGoal = false;
 
-  //查找表：用于碰撞的查找表及Dubin PATH的查找表
+  // 查找表：用于碰撞的查找表及 Dubin PATH 的查找表
   /// A lookup table for configurations of the vehicle and their spatial occupancy enumeration
   Constants::config collisionLookup[Constants::headings * Constants::positions]; 
   /// A lookup of analytical solutions (Dubin's paths)
-  float* dubinsLookup = new float [Constants::headings * Constants::headings * Constants::dubinsWidth * Constants::dubinsWidth];
+  float* dubinsLookup = new float [Constants::headings * Constants::headings
+                                    * Constants::dubinsWidth * Constants::dubinsWidth];
 };
 }
 #endif // PLANNER_H

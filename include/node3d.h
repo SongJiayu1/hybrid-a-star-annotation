@@ -9,7 +9,7 @@ namespace HybridAStar {
 /*!
    \brief A three dimensional node class that is at the heart of the algorithm.
    Each node has a unique configuration (x, y, theta) in the configuration space C.
-   这是算法的核心类，每个节点的配置为(x, y, theta)
+   这是算法的核心类，每个节点的配置为 (x, y, theta)
 */
 class Node3D {
  public:
@@ -22,11 +22,11 @@ class Node3D {
     this->x = x;
     this->y = y;
     this->t = t;
-    this->g = g;
-    this->h = h;
-    this->pred = pred;
-    this->o = false;
-    this->c = false;
+    this->g = g; // 当前 cost
+    this->h = h; // 启发 cost
+    this->pred = pred;  // 指向当前节点的上一个节点的指针，指针的类型为 Node3D
+    this->o = false;  // 节点是否在 openlist 中
+    this->c = false;  // 节点是否在 closelist 中
     this->idx = -1;
     this->prim = prim;
   }
@@ -44,16 +44,20 @@ class Node3D {
   float getH() const { return h; }
   /// get the total estimated cost
   float getC() const { return g + h; }
+
   /// get the index of the node in the 3D array
   int getIdx() const { return idx; }
+  
   /// get the number associated with the motion primitive of the node
   int getPrim() const { return prim; }
+
   /// determine whether the node is open
   bool isOpen() const { return o; }
   /// determine whether the node is closed
   bool isClosed() const { return c; }
+
   /// determine whether the node is open
-  const Node3D* getPred() const { return pred; }
+  const Node3D* getPred() const { return pred; }  // 返回当前节点的上一个节点
 
   // SETTER METHODS：设置方法，用新值替代旧值
   /// set the x position
